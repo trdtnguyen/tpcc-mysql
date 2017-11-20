@@ -2,5 +2,5 @@
 
 source const.sh
 
-echo "Start mysqld_safe ..."
-$MYSQL_BIN/mysqld_safe -u $USER
+echo "Start mysqld ..."
+$MYSQL_BIN/mysqld --defaults-file=$CONFIG -u $USER
