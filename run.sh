@@ -1,15 +1,16 @@
 #!/bin/bash
-HOST=115.145.173.215
-DB=tpcc1000
-USER=vldb
-WH=500
-CONN=32
-RUNTIME=1200
-OUTPUT=tpcc-out-bpool-768.out
+source const.sh
 
-if [ -n $1 ]; then
-	OUTPUT=$1
-fi
+sudo sysctl vm.drop_caches=3
+sudo sysctl vm.drop_caches=3
 
-#./tpcc_start -h$HOST -d$DB -u$USER -w$WH -c$CONN -l$RUNTIME > tpcc-out-bpool-256.out
-./tpcc_start -h$HOST -d$DB -u$USER -w$WH -c$CONN -l$RUNTIME -i10 2>&1 | tee $OUTPUT 
+#if [ -n $1 ]; then
+#	OUT_DIR=$1
+#fi
+#Get the buffer pool value
+
+BUFFER_POOL=$(mysql -u vldb -e "SHOW VARIABLES LIKE '%buffer_pool_size%';" | grep "buffer_pool_size" | awk '{print($2/(1024^3))}')
+echo "Current buffer pool size is $BUFFER_POOL GB"
+
+echo "Run the tppc in $RUNTIME seconds..."
+$TPCC_START -h$HOST -d$DBNAME -u$USER -w$WH -c$CONN -l$RUNTIME -i10 2>&1 | tee $OUT_DIR/W${WH}_BP${BUFFER_POOL}.out

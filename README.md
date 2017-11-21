@@ -82,4 +82,11 @@ Where:
 * max_rt: 213.169: - The Max Response time of New Order transactions per given interval. In this case it is 213.169 sec
 * the rest: `12919|98.778, 1292|101.096, 1293|443.955, 1293|670.842` is throughput and max response time for the other kind of transactions and can be ignored
 
+Analysis
+===================================
 
+./tpcc-output-analyze.sh output/W1000_BP5.out > W1000_BP5_analy.txt
+
+Build gnuplot
+===================================
+./tpcc-graph-build.sh W1000_BP5_analy.txt W1000_BP5_graph.jpg
