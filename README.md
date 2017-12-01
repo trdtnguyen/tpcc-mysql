@@ -85,8 +85,12 @@ Where:
 Analysis
 ===================================
 
-./tpcc-output-analyze.sh output/W1000_BP5.out > W1000_BP5_analy.txt
+./tpcc-output-analyze.sh output/ori_W1000_BP5.out > output/ori_W1000_BP5_analy.txt
+./tpcc-output-analyze.sh output/method1_W1000_BP5.out > output/method1_W1000_BP5_analy.txt
 
 Build gnuplot
 ===================================
-./tpcc-graph-build.sh W1000_BP5_analy.txt W1000_BP5_graph.jpg
+Combine two file
+paste output/ori_W1000_BP5_analy.txt output/method1_W1000_BP5_analy.txt > combined_W1000_BP5_analy.txt
+
+./tpcc-graph-build.sh combine_W1000_BP5_analy.txt combined_W1000_BP5_graph.jpg

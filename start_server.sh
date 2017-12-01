@@ -5,7 +5,7 @@
 
 source const.sh
 
-BPSIZE=1
+BPSIZE=5
 
 if [ -n $1 ]; then
 	BPSIZE=$1
