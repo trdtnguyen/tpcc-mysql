@@ -9,7 +9,7 @@ sudo sysctl vm.drop_caches=3
 #fi
 #Get the buffer pool value
 
-BUFFER_POOL=$(mysql -u vldb -e "SHOW VARIABLES LIKE '%buffer_pool_size%';" | grep "buffer_pool_size" | awk '{print($2/(1024^3))}')
+BUFFER_POOL=$($MYSQL -u vldb -e "SHOW VARIABLES LIKE '%buffer_pool_size%';" | grep "buffer_pool_size" | awk '{print($2/(1024^3))}')
 echo "Current buffer pool size is $BUFFER_POOL GB"
 
 #file format method_warehourses_bufferpool.out

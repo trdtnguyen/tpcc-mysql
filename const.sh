@@ -23,7 +23,9 @@ OUT_DIR=$BENCHMARK_HOME/output
 
 #METHOD: ori, pmemblk
 #METHOD=ori
+#METHOD=pmemblk
 METHOD=pmemmem
 WH=1000
 CONN=24
 RUNTIME=7200
+BP=60
