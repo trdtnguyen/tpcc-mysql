@@ -12,5 +12,5 @@ if [ -n $1 ]; then
 fi
 
 echo "Start mysqld with buffer pool size is $BPSIZE GB..."
-$MYSQL_BIN/mysqld --defaults-file=$CONFIG -u $USER --innodb_buffer_pool_size=${BPSIZE}G
+$MYSQL_BIN/mysqld --defaults-file=$CONFIG -u $USER --innodb_buffer_pool_size=${BPSIZE}G &
 #$MYSQL_BIN/mysqld --defaults-file=$CONFIG -u $USER --innodb_buffer_pool_size=${BPSIZE}G --debug

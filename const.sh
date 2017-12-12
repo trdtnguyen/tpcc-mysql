@@ -9,6 +9,8 @@ USER=vldb
 DBNAME=tpcc
 PASS=""
 
+IS_RESET=1
+
 #CONFIG=$BENCHMARK_HOME/my.cnf
 CONFIG=/etc/my.cnf
 #EXECUTES
@@ -21,10 +23,10 @@ TPCC_START=$BENCHMARK_HOME/tpcc_start
 
 OUT_DIR=$BENCHMARK_HOME/output
 
-#METHOD: ori, pmemblk
+#METHOD: ori, pmemblk, pmemmem, pmemlogbuf, pmemlogall
 #METHOD=ori
 #METHOD=pmemblk
-METHOD=pmemmem
+METHOD=logall_trxcom0
 WH=1000
 CONN=24
 RUNTIME=7200
