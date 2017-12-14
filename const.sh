@@ -9,7 +9,8 @@ USER=vldb
 DBNAME=tpcc
 PASS=""
 
-IS_RESET=1
+IS_RESET=0
+IS_INTEL_NVME=1
 
 #CONFIG=$BENCHMARK_HOME/my.cnf
 CONFIG=/etc/my.cnf
@@ -26,7 +27,7 @@ OUT_DIR=$BENCHMARK_HOME/output
 #METHOD: ori, pmemblk, pmemmem, pmemlogbuf, pmemlogall
 #METHOD=ori
 #METHOD=pmemblk
-METHOD=logall_trxcom0
+METHOD=pmemredolog
 WH=1000
 CONN=24
 RUNTIME=7200
