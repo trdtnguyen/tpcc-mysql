@@ -26,7 +26,7 @@ if [ $IS_INTEL_NVME -eq 1 ]; then
 	UNIT_READS1=$(sudo isdct show -intelssd 0 -performance | grep "DataUnitsRead" | awk -v FS="[():]" '{printf("%d\n",$2)}')
 	UNIT_WRITES1=$(sudo isdct show -intelssd 0 -performance | grep "DataUnitsWritten" | awk -v FS="[():]" '{printf("%d\n",$2)}')
 	HOST_READS1=$(sudo isdct show -intelssd 0 -performance | grep "HostReadCommands" | awk -v FS="[():]" '{printf("%d\n",$2)}')
-	HOST_WRITES1=$(sudo isdct show -intelssd 0 -performance | grep "HostWriteCommandsn" | awk -v FS="[():]" '{printf("%d\n",$2)}')
+	HOST_WRITES1=$(sudo isdct show -intelssd 0 -performance | grep "HostWriteCommands" | awk -v FS="[():]" '{printf("%d\n",$2)}')
 	EREASE1=$(sudo isdct show -intelssd 0 -smart AD | grep "Raw" | awk -v FS="[():]" '{printf("%s\n",$2)}')
 fi
 
@@ -58,8 +58,8 @@ if [ $IS_INTEL_NVME -eq 1 ]; then
 	UNIT_READS2=$(sudo isdct show -intelssd 0 -performance | grep "DataUnitsRead" | awk -v FS="[():]" '{printf("%d\n",$2)}')
 	UNIT_WRITES2=$(sudo isdct show -intelssd 0 -performance | grep "DataUnitsWritten" | awk -v FS="[():]" '{printf("%d\n",$2)}')
 	HOST_READS2=$(sudo isdct show -intelssd 0 -performance | grep "HostReadCommands" | awk -v FS="[():]" '{printf("%d\n",$2)}')
-	HOST_WRITES2=$(sudo isdct show -intelssd 0 -performance | grep "HostWriteCommandsn" | awk -v FS="[():]" '{printf("%d\n",$2)}')
-	EREASE1=$(sudo isdct show -intelssd 0 -smart AD | grep "Raw" | awk -v FS="[():]" '{printf("%s\n",$2)}')
+	HOST_WRITES2=$(sudo isdct show -intelssd 0 -performance | grep "HostWriteCommands" | awk -v FS="[():]" '{printf("%d\n",$2)}')
+	EREASE2=$(sudo isdct show -intelssd 0 -smart AD | grep "Raw" | awk -v FS="[():]" '{printf("%s\n",$2)}')
 
 	printf "DataUnitsRead = $(($UNIT_READS2-$UNIT_READS1)) " >> $statfile
 	printf "DataUnitsWritten = $(($UNIT_WRITES2-$UNIT_WRITES1)) " >> $statfile
