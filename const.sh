@@ -27,6 +27,9 @@ TPCC_START=$BENCHMARK_HOME/tpcc_start
 
 OUT_DIR=$BENCHMARK_HOME/output
 
+TRACE_FILE=trace.txt
+PMEM_TRACE=pmem_trace.sh
+
 #METHOD: ori, pmemblk, pmemmem, pmemlogbuf, pmemlogall
 METHOD=pmembuf_40th
 #METHOD=pmemblk
@@ -37,5 +40,6 @@ WH=100
 #CONN=24
 CONN=48
 #RUNTIME=7200
-RUNTIME=3600
+#RUNTIME=3600
+RUNTIME=600
 BP=60
