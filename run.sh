@@ -14,8 +14,8 @@ query2=" SELECT EVENT_NAME, COUNT_STAR, SUM_TIMER_WAIT/1000000000 SUM_TIMER_WAIT
 		ORDER BY SUM_TIMER_WAIT_MS DESC;
 		"
 
-statfile=$BENCHMARK_HOME/overall.txt
-sumfile=$BENCHMARK_HOME/summary.txt
+#statfile=$BENCHMARK_HOME/overall.txt
+#sumfile=$BENCHMARK_HOME/summary.txt
 
 date=$(date '+%Y%m%d_%H%M%S')
 #date="$(date --rfc-3339=seconds)"
@@ -78,7 +78,7 @@ fi
 
 #file format method_warehourses_bufferpool.out
 echo "Run the tppc in $RUNTIME seconds..."
-$TPCC_START -h$HOST -d$DBNAME -u$USER -w$WH -c$CONN -l$RUNTIME -i10 2>&1 | tee $outfile
+$TPCC_START -h$HOST -d$DBNAME -u$USER -w$WH -c$CONN -l$RUNTIME -r$WARMUP_TIME -i10 2>&1 | tee $outfile
 
 
 #####################################
@@ -93,8 +93,8 @@ $TPCC_START -h$HOST -d$DBNAME -u$USER -w$WH -c$CONN -l$RUNTIME -i10 2>&1 | tee $
 echo "======== the benchmark run is finished, start collect results..."
 printf "${date} DES_DEVICE = ${DES_DEV} method = ${METHOD} WH = ${WH} CONN = ${CONN} RUNTIME = ${RUNTIME} BP = ${BUFFER_POOL} " >> $statfile
 
-# TPCC result
-cat $outfile | grep trx | awk -v FS="[,():]" '{c=c+10;s=s+$3;lat=lat+$7;max_rt=max_rt+$9} END {c=(c/60);printf("TpmC = %s avg.99lat = %s max_rt = %s ",(s/c),(lat/c),(max_rt/c))}' >> $statfile
+# TPCC result, 95% is $5, 99% is $7
+cat $outfile | grep trx | awk -v FS="[,():]" '{c=c+10;s=s+$3;lat1=lat1+$5;lat2=lat2+$7;max_rt=max_rt+$9} END {c=(c/60);printf("TpmC = %s 95p = %s 99p = %s max_rt = %s ",(s/c),(lat1/c),(lat2/c),(max_rt/c))}' >> $statfile
 
 ######### Part 2: Get the necessary values from "SHOW ENGINE INNODB STATUS \G #####
 $MYSQL -u $USER -e "show engine innodb status \g" > dummy.txt 
@@ -109,6 +109,12 @@ printf "Semaphores_OS_waits: " >> $statfile
 	rm dummy.txt
 #mutex
 $MYSQL -u $USER -e "show engine innodb mutex" | grep sum | awk -v FS=" " '{printf("%s\n", $5)}' | awk -v FS="=" '{printf("sum_mutexes %s , ",$2)}' >> $statfile
+
+#### InnoDB Buffer Pool Cache hit
+# Get info for innodb buffer pool cache hit, cache_hit = val1 / (val1 + val2) * 100, val1 = reads_from_buf, val2=reads_from_dev
+$MYSQL -u $USER -e "show global status like 'innodb_buffer_pool%';" | grep "read_requests" | awk '{printf(" reads_from_buf %s ",$2)}' >> $statfile
+$MYSQL -u $USER -e "show global status like 'innodb_buffer_pool%';" | grep "reads" | awk '{printf("reads_from_dev %s ",$2)}' >> $statfile
+
 ######## Part 3 Devices info
 
 
@@ -150,14 +156,17 @@ else
 	printf "Total_LBAs_Written = $d1 , Wear_Leveling_Count = $d2 , WAF = $WAF" >> $statfile
 
 fi
+
+
+
 printf "\n" >> $statfile
 ##### End of line in file
 
 echo "collecting results is finished, check $statfile for overall result, $sumfile for summary, and $outfile for detail result"
 
 #for summary info that can paste to excel file 
-printf "$date " >> $sumfile
-tail -n 1 $statfile | awk -v FS=" " '{printf("met th tpmC 99th os_wr os_fsy Sem log_ios sum_mut LBA_wr %s %s %s %s %s %s %s %s %s %s %s %s\n",$6, $12, $21,$24, $32, $36, $49, $50, $51, $52, $60, $64)}' >> $sumfile
+#printf "$date " >> $sumfile
+#tail -n 1 $statfile | awk -v FS=" " '{printf("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n",$6, $12, $21,$24, $27, $35, $39, $52, $53, $54, $55, $63, $66, $68, $71)}' >> $sumfile
 
 if [ $IS_TRACE -eq 1 ]; then
 #kill it if it hasn't died yet
