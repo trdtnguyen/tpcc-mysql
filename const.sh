@@ -2,7 +2,7 @@
 
 #run mode options:
 #ori 1, dbw 2, wal 3, even_pmembuf 4, single_pmembuf 5, less_pmem_buf 6, wal + less 7
-mode=3
+mode=1
 
 if [ $mode -eq 1 ]; then
 METHOD=ori
@@ -42,6 +42,7 @@ IS_SAMSUNG_NVME=0
 #DATA_DIR=tpcc_w300_4k
 #WH=300
 
+
 DATA_DIR=tpcc_w1000_4k
 WH=1000
 
@@ -65,16 +66,20 @@ PMEM_N_FLUSH_THREADS=32
 PMEM_FLUSH_THRESHOLD=1
 
 # for UNIV_PMEMOBJ_BUF_PARTITION
-IS_PMEM_PARTITION=0 #set this to 1 for SINGLE, LESS partition
+IS_PMEM_PARTITION=1 #set this to 1 for SINGLE, LESS partition
+#PMEM_N_SPACE_BITS=3
 PMEM_N_SPACE_BITS=5
 #PMEM_PAGE_PER_BUCKET_BITS=31 #for SINGLE
 PMEM_PAGE_PER_BUCKET_BITS=10 #for EVEN
 
 ###################################################
 
+
+
 #For statistic information
 TRACE_FILE1=trace_flush.txt
 TRACE_FILE2=part_debug.txt
+PERF_SCHEMA_FILE=perf_schema_trace.txt
 
 #Those values for using nvme, smartctl, umount
 NVME_DEV1=/dev/nvme0n1
@@ -83,10 +88,6 @@ SSD_DEV1=/dev/sdd1
 
 DEV1=$SSD_DEV1
 
-#sleep time (in seconds)  may diffenrent depend on the data size
-#this used for recovery benchmark
-#THREAD_KILLER_SLEEP=310
-THREAD_KILLER_SLEEP=610
 
 SLEEP_DROP_CACHE=2
 SLEEP_CP=90 #small_data: 60, large_data: 120
@@ -100,10 +101,21 @@ WARMUP_TIME=60
 CONN=32
 #CONN=50
 #CONN=100
-#RUNTIME=1800
-RUNTIME=900
-#RUNTIME=100
+
+RUNTIME=3600 #for long benchmark
+#RUNTIME=900 #for average benchmark
+#RUNTIME=800 #for recovery benchmark
+#RUNTIME=100 #for debugging
+
 SSD_SIZE=512 #GB
+
+#######         Recovery
+RECV_FILE=rec_trace.out
+#sleep time (in seconds)  may diffenrent depend on the data size
+#this used for recovery benchmark
+#THREAD_KILLER_SLEEP=310
+THREAD_KILLER_SLEEP=$RUNTIME
+###################################
 
 BENCHMARK_HOME=/home/vldb/benchmark/tpcc-mysql
 MYSQL_HOME=/usr/local/mysql
@@ -138,6 +150,7 @@ TRACE_FILE=trace.txt
 PMEM_TRACE=pmem_trace.sh
 sumfile=$BENCHMARK_HOME/summary.txt
 statfile=$BENCHMARK_HOME/overall.txt
+perffile=$BENCHMARK_HOME/perf_overall.txt
 
 #METHOD: ori, pmemblk, pmemmem, pmemlogbuf, pmemlogall
 #METHOD=pmemblk

@@ -6,14 +6,65 @@ sleep 2
 sudo sysctl vm.drop_caches=3
 
 
-query1="UPDATE performance_schema.setup_consumers SET enabled = 'YES' WHERE name like 'events_waits%';"
 
-query2=" SELECT EVENT_NAME, COUNT_STAR, SUM_TIMER_WAIT/1000000000 SUM_TIMER_WAIT_MS 
+#This query enable all events
+query0="UPDATE performance_schema.setup_consumers SET enabled = 'YES' WHERE name like 'events_waits%';"
+
+#This query enable only important events
+
+query1="UPDATE performance_schema.setup_instruments
+	SET ENABLED = 'YES', TIMED = 'YES'
+	WHERE (
+	name like 'wait/synch/mutex/innodb/buf_pool_mutex' OR
+	name like 'wait/synch/mutex/innodb/buf_pool_zip_mutex' OR
+	name like 'wait/synch/mutex/innodb/cache_last_read_mutex' OR
+	name like 'wait/synch/mutex/innodb/flush_list_mutex' OR
+	name like 'wait/synch/mutex/innodb/hash_table_mutex' OR
+	name like 'wait/synch/mutex/innodb/page_cleaner_mutex' OR
+
+	name like 'wait/synch/mutex/innodb/log_sys_mutex' OR
+	name like 'wait/synch/mutex/innodb/log_sys_write_mutex' OR
+	name like 'wait/synch/mutex/innodb/log_flush_order_mutex' OR
+	name like 'wait/synch/mutex/innodb/log_cmdq_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/trx_mutex' OR
+	name like 'wait/synch/mutex/innodb/trx_undo_mutex' OR
+	name like 'wait/synch/mutex/innodb/trx_sys_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/buf_dblwr_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/lock_mutex' OR
+	name like 'wait/synch/mutex/innodb/lock_wait_mutex' OR
+	name like 'wait/synch/mutex/innodb/rw_lock_mutex' OR
+	name like 'wait/synch/mutex/innodb/rw_lock_list_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/recv_sys_mutex' OR
+	name like 'wait/synch/mutex/innodb/recv_writer_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/ibuf_mutex' OR
+	name like 'wait/synch/mutex/innodb/ibuf_bitmap_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/thread_mutex' OR
+	
+	name like 'wait/synch/mutex/innodb/fil_system_mutex' OR
+	
+	name like 'wait/synch/sxlock/innodb/btr_search_latch' OR
+	name like 'wait/synch/sxlock/innodb/fil_space_latch' OR
+	name like 'wait/synch/sxlock/innodb/checkpoint_mutex' OR
+	
+	name like 'wait/synch/cond/innodb/commit_cond'
+	);
+	"
+
+query2=" SELECT EVENT_NAME, 
+			COUNT_STAR,
+		   	SUM_TIMER_WAIT/1000000 SUM_TIMER_WAIT_US,
+			AVG_TIMER_WAIT/1000000 AVG_TIMER_WAIT_US,
+			MAX_TIMER_WAIT/1000000 MAX_TIMER_WAIT_US
 		FROM performance_schema.events_waits_summary_global_by_event_name
-		WHERE SUM_TIMER_WAIT > 0 AND EVENT_NAME LIKE 'wait/synch/mutex/innodb/%'
-		ORDER BY SUM_TIMER_WAIT_MS DESC;
+		WHERE SUM_TIMER_WAIT > 0 
+		ORDER BY SUM_TIMER_WAIT_US DESC;
 		"
-
 #statfile=$BENCHMARK_HOME/overall.txt
 #sumfile=$BENCHMARK_HOME/summary.txt
 
@@ -41,6 +92,8 @@ fi
 
 outfile=$OUT_DIR/${date}_${METHOD}_W${WH}_BP${BUFFER_POOL}_T${CONN}.out
 outfile_mutex=$OUT_DIR/${date}_${METHOD}_W${WH}_BP${BUFFER_POOL}.mutex
+#for perfomance_schema
+outfile_perf=$OUT_DIR/${date}_${METHOD}_W${WH}_BP${BUFFER_POOL}_T${CONN}.perf
 
 if [ $IS_INTEL_NVME -eq 1 ]; then
 	echo "Collect Intel NVMe information"
@@ -69,7 +122,11 @@ fi
 #########  ##############
 
 ######### PERFORMANCE SCHEMA ##############
-#$MYSQL -u $USER -e "$query1"
+##Option 1: Only take the final result
+$MYSQL -u $USER -e "$query1"
+
+##Option 2: Call another process to periodically collect the result
+#$BENCHMARK_HOME/performance_schema.sh &
 #####################################
 
 #####################################
@@ -114,6 +171,13 @@ $MYSQL -u $USER -e "show engine innodb mutex" | grep sum | awk -v FS=" " '{print
 # Get info for innodb buffer pool cache hit, cache_hit = val1 / (val1 + val2) * 100, val1 = reads_from_buf, val2=reads_from_dev
 $MYSQL -u $USER -e "show global status like 'innodb_buffer_pool%';" | grep "read_requests" | awk '{printf(" reads_from_buf %s ",$2)}' >> $statfile
 $MYSQL -u $USER -e "show global status like 'innodb_buffer_pool%';" | grep "reads" | awk '{printf("reads_from_dev %s ",$2)}' >> $statfile
+
+### PERFORMANCE_SCHEMA (Optional)
+echo "Report date:$date" > $outfile_perf
+# Get information from InnoDB's performance_schema
+$MYSQL -u $USER -e "$query2" >> $outfile_perf
+# Process the performance schema information and save it into an output file (perf_overall.txt)
+$BENCHMARK_HOME/psi_collector.sh $outfile_perf
 
 ######## Part 3 Devices info
 
