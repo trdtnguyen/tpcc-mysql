@@ -7,10 +7,11 @@ TPCC benchmark for MySQL
 	
 [trdtnguyen added]
 To add mysql server libraries to the shared library cache:
-   * `touch /etc/ld.so.conf.d/mysql.conf`
-   * 'echo "/usr/local/mysql/lib" > /etc/ld.so.conf.d/mysql.conf' 
-   * 'ldconfig'
-
+```
+   touch /etc/ld.so.conf.d/mysql.conf
+   echo "/usr/local/mysql/lib" > /etc/ld.so.conf.d/mysql.conf 
+   ldconfig
+```
 ## Load data
    * create database
      `mysqladmin create tpcc1000`
@@ -92,6 +93,7 @@ Where:
 ===================================
 
 `./tpcc-output-analyze.sh output/ori_W1000_BP5.out > output/ori_W1000_BP5_analy.txt`
+
 `./tpcc-output-analyze.sh output/method1_W1000_BP5.out > output/method1_W1000_BP5_analy.txt`
 
 ## Build gnuplot
